@@ -79,6 +79,34 @@ specific to ARM.
 				    corresponding interface programming
 				    registers.
 
+	- CCI PMU node
+
+		Node name must be "pmu".
+		Parent node must be CCI interconnect node.
+
+		A CCI pmu node must contain the following properties:
+
+		- compatible
+			Usage: required
+			Value type: <string>
+			Definition: must be set to one of
+				    "arm,cci-400-pmu"
+				    "arm,cci-400-pmu,rev0"
+				    "arm,cci-400-pmu,rev1"
+
+		- reg:
+			Usage: required
+			Value type: <prop-encoded-array>
+			Definition: the base address and size of the
+				    corresponding interface programming
+				    registers.
+
+		- interrupts:
+			Usage: required
+			Value type: <prop-encoded-array>
+			Definition: comma-separated list of unique PMU
+				    interrupts
+
 * CCI interconnect bus masters
 
 	Description: masters in the device tree connected to a CCI port
@@ -162,6 +190,16 @@ Example:
 			compatible = "arm,cci-400-ctrl-if";
 			interface-type = "ace";
 			reg = <0x5000 0x1000>;
+		};
+
+		pmu@9000 {
+			 compatible = "arm,cci-400-pmu,rev0";
+			 reg = <0x9000 0x5000>;
+			 interrupts = <0 101 4>,
+				      <0 102 4>,
+				      <0 103 4>,
+				      <0 104 4>,
+				      <0 105 4>;
 		};
 	};
 
