@@ -5,6 +5,7 @@
 #include <uapi/linux/bpf.h>
 #include <uapi/linux/bpf_perf_event.h>
 #include <uapi/linux/types.h>
+#include <kvm/bpf.h>
 #include <linux/seq_file.h>
 #include <linux/compiler.h>
 #include <linux/ctype.h>

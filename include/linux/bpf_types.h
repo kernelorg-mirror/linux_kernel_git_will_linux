@@ -77,6 +77,12 @@ BPF_PROG_TYPE(BPF_PROG_TYPE_LSM, lsm,
 	       void *, void *)
 #endif /* CONFIG_BPF_LSM */
 #endif
+#ifdef CONFIG_KVM
+BPF_PROG_TYPE(BPF_PROG_TYPE_KVM_IO_READ, kvm_io,
+	      struct bpf_kvm_io_ctx, struct bpf_kvm_io_ctx_kern)
+BPF_PROG_TYPE(BPF_PROG_TYPE_KVM_IO_WRITE, kvm_io,
+	      struct bpf_kvm_io_ctx, struct bpf_kvm_io_ctx_kern)
+#endif
 BPF_PROG_TYPE(BPF_PROG_TYPE_SYSCALL, bpf_syscall,
 	      void *, void *)
 

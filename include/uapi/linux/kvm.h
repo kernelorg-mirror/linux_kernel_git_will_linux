@@ -1436,12 +1436,27 @@ enum kvm_device_type {
 #define KVM_DEV_TYPE_XIVE		KVM_DEV_TYPE_XIVE
 	KVM_DEV_TYPE_ARM_PV_TIME,
 #define KVM_DEV_TYPE_ARM_PV_TIME	KVM_DEV_TYPE_ARM_PV_TIME
+	KVM_DEV_TYPE_BPF,
+#define KVM_DEV_TYPE_BPF		KVM_DEV_TYPE_BPF
 	KVM_DEV_TYPE_MAX,
 };
 
 struct kvm_vfio_spapr_tce {
 	__s32	groupfd;
 	__s32	tablefd;
+};
+
+#define KVM_DEV_BPF_ATTR_GROUP_REGION	1
+struct kvm_bpf_user_region {
+	__u64	addr;
+	__u64	size;
+	__s32	bpf_readfd;
+	__s32	bpf_writefd;
+};
+
+#define KVM_DEV_BPF_ATTR_GROUP_IRQ	2
+struct kvm_bpf_user_irq {
+	__s32	eventfd;
 };
 
 /*

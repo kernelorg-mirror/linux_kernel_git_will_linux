@@ -986,6 +986,8 @@ enum bpf_prog_type {
 	BPF_PROG_TYPE_LSM,
 	BPF_PROG_TYPE_SK_LOOKUP,
 	BPF_PROG_TYPE_SYSCALL, /* a program that can execute syscalls */
+	BPF_PROG_TYPE_KVM_IO_READ,
+	BPF_PROG_TYPE_KVM_IO_WRITE,
 };
 
 enum bpf_attach_type {
@@ -6976,6 +6978,14 @@ struct bpf_sk_lookup {
 	__u32 local_ip6[4];	/* Network byte order */
 	__u32 local_port;	/* Host byte order */
 	__u32 ingress_ifindex;		/* The arriving interface. Determined by inet_iif. */
+};
+
+struct bpf_kvm_io_ctx {
+	__u8	buf[8];		/* I/O transfer buffer */
+	__u64	offset;		/* Offset within region */
+	__u8	len;		/* Access size */
+	__u32	:24;		/* Padding, future use. */
+	__u32	vcpu_id;	/* User-assigned ID of the vCPU performing the I/O operation */
 };
 
 /*
