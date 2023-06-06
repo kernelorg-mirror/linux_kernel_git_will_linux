@@ -5504,6 +5504,30 @@ union bpf_attr {
  *		0 on success.
  *
  *		**-ENOENT** if the bpf_local_storage cannot be found.
+ *
+ * u32 bpf_get_cpu_freq(u32 cpu)
+ *	Description
+ *		Retrieve the current frequency of CPU *cpu* in kHz as per
+ *		/sys/devices/system/cpu/cpu<cpu>/cpufreq/scaling_cur_freq.
+ *	Return
+ *		The frequency of *cpu* or 0 if *cpu* does not correspond to a
+ *		valid CPU.
+ *
+ * u32 bpf_get_cpu_hw_max_freq(u32 cpu)
+ *	Description
+ *		Retrieve the maximum hardware frequency of CPU *cpu* in kHz as
+ *		per /sys/devices/system/cpu/cpu<cpu>/cpufreq/cpuinfo_max_freq.
+ *	Return
+ *		The maximum hardware frequency of *cpu* or 0 if *cpu* does not
+ *		correspond to a valid CPU.
+ *
+ * u64 bpf_get_cpu_scale(u32 cpu)
+ *	Description
+ *		Retrieve the capacity of CPU *cpu* as per
+ *		per /sys/devices/system/cpu/cpu<cpu>/cpu_capacity.
+ *	Return
+ *		The capacity of *cpu* or 0 if *cpu* does not correspond to a
+ *		valid CPU.
  */
 #define ___BPF_FUNC_MAPPER(FN, ctx...)			\
 	FN(unspec, 0, ##ctx)				\
@@ -5718,6 +5742,9 @@ union bpf_attr {
 	FN(user_ringbuf_drain, 209, ##ctx)		\
 	FN(cgrp_storage_get, 210, ##ctx)		\
 	FN(cgrp_storage_delete, 211, ##ctx)		\
+	FN(get_cpu_freq, 212, ##ctx)			\
+	FN(get_cpu_hw_max_freq, 213, ##ctx)		\
+	FN(get_cpu_scale, 214, ##ctx)			\
 	/* */
 
 /* backwards-compatibility macros for users of __BPF_FUNC_MAPPER that don't

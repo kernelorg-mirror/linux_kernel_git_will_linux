@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2011-2014 PLUMgrid, http://plumgrid.com
  */
+#include <linux/arch_topology.h>
 #include <linux/bpf.h>
 #include <linux/btf.h>
 #include <linux/bpf-cgroup.h>
 #include <linux/cgroup.h>
+#include <linux/cpufreq.h>
 #include <linux/rcupdate.h>
 #include <linux/random.h>
 #include <linux/smp.h>
@@ -433,6 +435,53 @@ const struct bpf_func_proto bpf_get_current_ancestor_cgroup_id_proto = {
 	.arg1_type	= ARG_ANYTHING,
 };
 #endif /* CONFIG_CGROUPS */
+
+#ifdef CONFIG_CPU_FREQ
+BPF_CALL_1(bpf_get_cpu_freq, u32, cpu)
+{
+	if (cpu > nr_cpu_ids)
+		return 0;
+
+	return cpufreq_quick_get(cpu);
+}
+
+const struct bpf_func_proto bpf_get_cpu_freq_proto = {
+	.func		= bpf_get_cpu_freq,
+	.gpl_only	= false,
+	.ret_type	= RET_INTEGER,
+	.arg1_type	= ARG_ANYTHING,
+};
+
+BPF_CALL_1(bpf_get_cpu_hw_max_freq, u32, cpu)
+{
+	if (cpu > nr_cpu_ids)
+		return 0;
+
+	return cpufreq_get_hw_max_freq(cpu);
+}
+
+const struct bpf_func_proto bpf_get_cpu_hw_max_freq_proto = {
+	.func		= bpf_get_cpu_hw_max_freq,
+	.gpl_only	= false,
+	.ret_type	= RET_INTEGER,
+	.arg1_type	= ARG_ANYTHING,
+};
+
+BPF_CALL_1(bpf_get_cpu_scale, u32, cpu)
+{
+	if (cpu > nr_cpu_ids)
+		return 0;
+
+	return topology_get_cpu_scale(cpu);
+}
+
+const struct bpf_func_proto bpf_get_cpu_scale_proto = {
+	.func		= bpf_get_cpu_scale,
+	.gpl_only	= false,
+	.ret_type	= RET_INTEGER,
+	.arg1_type	= ARG_ANYTHING,
+};
+#endif /* CONFIG_CPU_FREQ */
 
 #define BPF_STRTOX_BASE_MASK 0x1F
 
@@ -1693,6 +1742,14 @@ bpf_base_func_proto(enum bpf_func_id func_id)
 		return &bpf_cgrp_storage_get_proto;
 	case BPF_FUNC_cgrp_storage_delete:
 		return &bpf_cgrp_storage_delete_proto;
+#endif
+#ifdef CONFIG_CPU_FREQ
+	case BPF_FUNC_get_cpu_freq:
+		return &bpf_get_cpu_freq_proto;
+	case BPF_FUNC_get_cpu_hw_max_freq:
+		return &bpf_get_cpu_hw_max_freq_proto;
+	case BPF_FUNC_get_cpu_scale:
+		return &bpf_get_cpu_scale_proto;
 #endif
 	default:
 		break;
