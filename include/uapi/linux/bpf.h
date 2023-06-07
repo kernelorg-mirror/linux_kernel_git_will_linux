@@ -5528,6 +5528,15 @@ union bpf_attr {
  *	Return
  *		The capacity of *cpu* or 0 if *cpu* does not correspond to a
  *		valid CPU.
+ *
+ * int bpf_set_current_uclamp(u32 sched_util_min, u32 sched_util_max)
+ *	Description
+ *		Set the uclamp utilization constaints for the current task.
+ *		Note that this differs slightly from the sched_setattr(2)
+ *		interface in that a util value of -1 is ignored rather
+ *		than resetting to the system default.
+ *	Return
+ *		0 on success, negative error code otherwise.
  */
 #define ___BPF_FUNC_MAPPER(FN, ctx...)			\
 	FN(unspec, 0, ##ctx)				\
@@ -5745,6 +5754,7 @@ union bpf_attr {
 	FN(get_cpu_freq, 212, ##ctx)			\
 	FN(get_cpu_hw_max_freq, 213, ##ctx)		\
 	FN(get_cpu_scale, 214, ##ctx)			\
+	FN(set_current_uclamp, 215, ##ctx)		\
 	/* */
 
 /* backwards-compatibility macros for users of __BPF_FUNC_MAPPER that don't

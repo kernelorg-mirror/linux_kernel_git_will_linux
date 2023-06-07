@@ -24,6 +24,8 @@
 #include <linux/btf_ids.h>
 #include <linux/bpf_mem_alloc.h>
 
+#include <uapi/linux/sched/types.h>
+
 #include "../../lib/kstrtox.h"
 
 /* If kernel subsystem is allowing eBPF programs to call this function,
@@ -480,6 +482,28 @@ const struct bpf_func_proto bpf_get_cpu_scale_proto = {
 	.gpl_only	= false,
 	.ret_type	= RET_INTEGER,
 	.arg1_type	= ARG_ANYTHING,
+};
+
+BPF_CALL_2(bpf_set_current_uclamp, u32, sched_util_min, u32, sched_util_max)
+{
+	u32 uc_flags = (sched_util_min != -1 ? SCHED_FLAG_UTIL_CLAMP_MIN : 0) |
+		       (sched_util_max != -1 ? SCHED_FLAG_UTIL_CLAMP_MAX : 0) ;
+	struct sched_attr attr = {
+		.sched_policy	= -1 /* SETPARAM_POLICY */,
+		.sched_flags	= uc_flags | SCHED_FLAG_KEEP_ALL,
+		.sched_util_min	= sched_util_min,
+		.sched_util_max	= sched_util_max,
+	};
+
+	return sched_setattr(current, &attr);
+}
+
+const struct bpf_func_proto bpf_set_current_uclamp_proto = {
+	.func		= bpf_set_current_uclamp,
+	.gpl_only	= false,
+	.ret_type	= RET_INTEGER,
+	.arg1_type	= ARG_ANYTHING,
+	.arg2_type	= ARG_ANYTHING,
 };
 #endif /* CONFIG_CPU_FREQ */
 
@@ -1750,6 +1774,8 @@ bpf_base_func_proto(enum bpf_func_id func_id)
 		return &bpf_get_cpu_hw_max_freq_proto;
 	case BPF_FUNC_get_cpu_scale:
 		return &bpf_get_cpu_scale_proto;
+	case BPF_FUNC_set_current_uclamp:
+		return &bpf_set_current_uclamp_proto;
 #endif
 	default:
 		break;
