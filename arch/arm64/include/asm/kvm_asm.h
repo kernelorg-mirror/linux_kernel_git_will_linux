@@ -398,6 +398,22 @@ void __noreturn __cold nvhe_hyp_panic_handler(u64 esr, u64 spsr, u64 elr_virt,
 	ldp	x29, lr,  [\ctxt, #CPU_XREG_OFFSET(29)]
 .endm
 
+#ifdef __KVM_VHE_HYPERVISOR__
+.macro activate_exception_stack
+msr	spsel, #1
+.endm
+
+.macro deactivate_exception_stack
+msr	spsel, #0
+.endm
+#else
+.macro activate_exception_stack
+.endm
+
+.macro deactivate_exception_stack
+.endm
+#endif
+
 .macro save_sp_el0 ctxt, tmp
 	mrs	\tmp,	sp_el0
 	str	\tmp,	[\ctxt, #CPU_SP_EL0_OFFSET]

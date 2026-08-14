@@ -133,7 +133,8 @@ SYM_FUNC_START(_cpu_resume)
 	add	x0, x0, #SLEEP_STACK_DATA_SYSTEM_REGS
 	/* load sp from context */
 	ldr	x2, [x0, #CPU_CTX_SP]
-	mov	sp, x2
+	msr	sp_el0, x2
+
 	/*
 	 * cpu_do_resume expects x0 to contain context address pointer
 	 */

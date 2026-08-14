@@ -327,7 +327,7 @@ static void debug_exception_exit(struct pt_regs *regs)
 }
 NOKPROBE_SYMBOL(debug_exception_exit);
 
-static void noinstr el1t_64_check_overflow_stack(struct pt_regs *regs)
+static void noinstr el1h_64_check_overflow_stack(struct pt_regs *regs)
 {
 	unsigned long sp = kernel_stack_pointer(regs) - sizeof(*regs);
 	unsigned long ovf_stack = (unsigned long)this_cpu_ptr(overflow_stack);
@@ -343,28 +343,28 @@ static void noinstr el1t_64_check_overflow_stack(struct pt_regs *regs)
 		cpu_park_loop();
 }
 
-asmlinkage void noinstr el1t_64_sync_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1h_64_sync_handler(struct pt_regs *regs)
 {
-	el1t_64_check_overflow_stack(regs);
-	el1h_64_sync_handler(regs);
+	el1h_64_check_overflow_stack(regs);
+	el1t_64_sync_handler(regs);
 }
 
-asmlinkage void noinstr el1t_64_irq_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1h_64_irq_handler(struct pt_regs *regs)
 {
-	el1t_64_check_overflow_stack(regs);
-	el1h_64_irq_handler(regs);
+	el1h_64_check_overflow_stack(regs);
+	el1t_64_irq_handler(regs);
 }
 
-asmlinkage void noinstr el1t_64_fiq_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1h_64_fiq_handler(struct pt_regs *regs)
 {
-	el1t_64_check_overflow_stack(regs);
-	el1h_64_fiq_handler(regs);
+	el1h_64_check_overflow_stack(regs);
+	el1t_64_fiq_handler(regs);
 }
 
-asmlinkage void noinstr el1t_64_error_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1h_64_error_handler(struct pt_regs *regs)
 {
-	el1t_64_check_overflow_stack(regs);
-	el1h_64_error_handler(regs);
+	el1h_64_check_overflow_stack(regs);
+	el1t_64_error_handler(regs);
 }
 
 static void noinstr el1_abort(struct pt_regs *regs, unsigned long esr)
@@ -494,7 +494,7 @@ static void noinstr el1_fpac(struct pt_regs *regs, unsigned long esr)
 	arm64_exit_to_kernel_mode(regs, state);
 }
 
-asmlinkage void noinstr el1h_64_sync_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1t_64_sync_handler(struct pt_regs *regs)
 {
 	unsigned long esr = read_sysreg(esr_el1);
 
@@ -578,17 +578,17 @@ static void noinstr el1_interrupt(struct pt_regs *regs,
 		__el1_irq(regs, handler);
 }
 
-asmlinkage void noinstr el1h_64_irq_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1t_64_irq_handler(struct pt_regs *regs)
 {
 	el1_interrupt(regs, handle_arch_irq);
 }
 
-asmlinkage void noinstr el1h_64_fiq_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1t_64_fiq_handler(struct pt_regs *regs)
 {
 	el1_interrupt(regs, handle_arch_fiq);
 }
 
-asmlinkage void noinstr el1h_64_error_handler(struct pt_regs *regs)
+asmlinkage void noinstr el1t_64_error_handler(struct pt_regs *regs)
 {
 	unsigned long esr = read_sysreg(esr_el1);
 	irqentry_state_t state;
