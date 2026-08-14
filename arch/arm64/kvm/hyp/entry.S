@@ -31,6 +31,7 @@ SYM_FUNC_START(__guest_enter)
 	save_callee_saved_regs x1
 
 	// Save hyp's sp_el0 and tpidrro_el0
+	activate_exception_stack
 	save_sp_el0	x1, x2
 	save_tpidrro_el0 x1, x2
 
@@ -50,6 +51,7 @@ alternative_else_nop_endif
 	// that would usually be synchonized by the ERET.
 	isb
 	mov	x0, #ARM_EXCEPTION_IRQ
+	deactivate_exception_stack
 	ret
 
 1:
@@ -167,6 +169,7 @@ SYM_INNER_LABEL(__guest_exit, SYM_L_GLOBAL)
 	// Restore hyp's sp_el0 and tpidrro_el0
 	restore_sp_el0 x2, x3
 	restore_tpidrro_el0 x2, x3
+	deactivate_exception_stack
 
 	// Now restore the hyp regs
 	restore_callee_saved_regs x2

@@ -54,6 +54,12 @@
 
 	.macro kernel_ventry_el1h, regsize:req, label:req
 	sub	sp, sp, #PT_REGS_SIZE
+	b	el1h_\regsize\()_\label
+	.endm
+
+	.macro kernel_ventry_el1t, regsize:req, label:req
+	msr	spsel, #0			// Stay on the kernel stack
+	sub	sp, sp, #PT_REGS_SIZE
 
 	/*
 	 * Test whether the SP has overflowed, without corrupting a GPR.
@@ -65,12 +71,6 @@
 	tbnz	x0, #THREAD_SHIFT, __bad_stack
 	sub	x0, sp, x0			// x0'' = sp' - x0' = (sp + x0) - sp = x0
 	sub	sp, sp, x0			// sp'' = sp' - x0 = (sp + x0) - x0 = sp
-	b	el1h_\regsize\()_\label
-	.endm
-
-	.macro kernel_ventry_el1t, regsize:req, label:req
-	msr	spsel, #0			// Stay on the overflow stack
-	sub	sp, sp, #PT_REGS_SIZE
 	b	el1t_\regsize\()_\label
 	.endm
 
@@ -208,7 +208,10 @@ alternative_cb_end
 	ldr_this_cpu	tsk, __entry_task, x20
 	msr	tpidrro_el0, tsk
 	adr_this_cpu	x19, overflow_stack + OVERFLOW_STACK_SIZE, x20
-	msr	sp_el0, x19
+	mov	x20, sp
+	msr	sp_el0, x20
+	mov	sp, x19
+	msr	spsel, #0
 
 	/*
 	 * Ensure MDSCR_EL1.SS is clear, since we can unmask debug exceptions
@@ -346,6 +349,9 @@ alternative_else_nop_endif
 
 	.if	\el == 0
 	ldr	x23, [sp, #S_SP]		// load return stack pointer
+	mov	x0, sp
+	msr	spsel, #1
+	mov	sp, x0
 	msr	sp_el0, x23
 	msr	tpidrro_el0, xzr
 	tst	x22, #PSR_MODE32_BIT		// native task?
@@ -532,16 +538,14 @@ SYM_CODE_START_LOCAL(__bad_stack)
 	add	sp, sp, #PT_REGS_SIZE
 
 	/* Switch to the overflow stack */
-	msr	spsel, #0
+	msr	spsel, #1
 
 	/* Stash the exception regs */
 	sub	sp, sp, #PT_REGS_SIZE
 	kernel_entry 1
 
 	/* Fix-up the saved SP */
-	msr	spsel, #1
-	mov	x0, sp
-	msr	spsel, #0
+	mrs	x0, sp_el0
 	str	x0, [sp, #S_SP]
 
 	/* Stash the regs for handle_bad_stack */

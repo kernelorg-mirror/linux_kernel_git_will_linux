@@ -87,6 +87,7 @@
  * This must be kept in sync with struct cpu_suspend_ctx in <asm/suspend.h>.
  */
 SYM_FUNC_START(cpu_do_suspend)
+	msr	spsel, #1
 	mrs	x2, tpidr_el0
 	mrs	x3, tpidrro_el0
 	mrs	x4, contextidr_el1
@@ -98,7 +99,7 @@ SYM_FUNC_START(cpu_do_suspend)
 	mrs	x10, oslsr_el1
 	mrs	x11, sctlr_el1
 	get_this_cpu_offset x12
-	mrs	x13, sp_el0
+	mov	x13, sp				// SP_EL1
 	stp	x2, x3, [x0]
 	stp	x4, x5, [x0, #16]
 	stp	x6, x7, [x0, #32]
@@ -114,6 +115,7 @@ alternative_if ARM64_HAS_TCR2
 	mrs	x2, REG_TCR2_EL1
 	str	x2, [x0, #104]
 alternative_else_nop_endif
+	msr	spsel, #0
 	ret
 SYM_FUNC_END(cpu_do_suspend)
 
@@ -121,6 +123,8 @@ SYM_FUNC_END(cpu_do_suspend)
  * cpu_do_resume - restore CPU register context
  *
  * x0: Address of context pointer
+ *
+ * Entered with SPSel == 1, returns with SPSel == 0.
  */
 SYM_FUNC_START(cpu_do_resume)
 	ldp	x2, x3, [x0]
@@ -159,7 +163,8 @@ alternative_else_nop_endif
 
 	msr	sctlr_el1, x12
 	set_this_cpu_offset x13
-	msr	sp_el0, x14
+	mov	sp, x14				// SP_EL1
+
 	/*
 	 * Restore oslsr_el1 by writing oslar_el1
 	 */
@@ -182,6 +187,7 @@ alternative_else_nop_endif
 
 	ptrauth_keys_install_kernel_nosync x15, x1, x2, x3
 	isb
+	msr	spsel, #0
 	ret
 SYM_FUNC_END(cpu_do_resume)
 #endif
