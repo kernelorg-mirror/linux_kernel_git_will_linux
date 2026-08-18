@@ -37,6 +37,7 @@
 #define PSR_MODE_EL3t	0x0000000c
 #define PSR_MODE_EL3h	0x0000000d
 #define PSR_MODE_MASK	0x0000000f
+#define PSR_MODE_h_BIT	0x00000001
 
 /* AArch32 CPSR bits */
 #define PSR_MODE32_BIT		0x00000010
