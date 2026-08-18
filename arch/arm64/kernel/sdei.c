@@ -208,7 +208,7 @@ unsigned long __kprobes do_sdei_event(struct pt_regs *regs,
 	int i, err = 0;
 	int clobbered_registers = 4;
 	u64 elr = read_sysreg(elr_el1);
-	u32 kernel_mode = read_sysreg(CurrentEL) | 1;	/* +SPSel */
+	u32 kernel_mode = read_sysreg(CurrentEL);
 	unsigned long vbar = read_sysreg(vbar_el1);
 
 	if (arm64_kernel_unmapped_at_el0())
@@ -233,7 +233,7 @@ unsigned long __kprobes do_sdei_event(struct pt_regs *regs,
 		pr_warn("unsafe: exception during handler\n");
 	}
 
-	mode = regs->pstate & (PSR_MODE32_BIT | PSR_MODE_MASK);
+	mode = regs->pstate & (PSR_MODE32_BIT | PSR_MODE_MASK) & ~PSR_MODE_h_BIT;
 
 	/*
 	 * If we interrupted the kernel with interrupts masked, we always go
@@ -251,7 +251,7 @@ unsigned long __kprobes do_sdei_event(struct pt_regs *regs,
 	 * address'.
 	 */
 	if (mode == kernel_mode)
-		return vbar + 0x280;
+		return vbar + (regs->pstate & PSR_MODE_h_BIT ? 0x280 : 0x80);
 	else if (mode & PSR_MODE32_BIT)
 		return vbar + 0x680;
 
