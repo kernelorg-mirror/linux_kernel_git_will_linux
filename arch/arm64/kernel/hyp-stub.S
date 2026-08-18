@@ -149,10 +149,11 @@ SYM_CODE_START_LOCAL(__finalise_el2)
 
 	isb
 
-	// Hack the exception return to stay at EL2
+	// Hack the exception return to stay at EL2 ...
 	mrs	x0, spsr_el1
-	and	x0, x0, #~PSR_MODE_MASK
-	mov	x1, #PSR_MODE_EL2h
+	// ... preserving the 'h' bit so we don't swizzle SP.
+	and	x0, x0, #(~PSR_MODE_MASK | PSR_MODE_h_BIT)
+	mov	x1, #PSR_MODE_EL2t
 	orr	x0, x0, x1
 	msr	spsr_el1, x0
 
