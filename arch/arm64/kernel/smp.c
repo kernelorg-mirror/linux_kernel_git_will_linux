@@ -447,9 +447,10 @@ void __init smp_cpus_done(unsigned int max_cpus)
 	mark_linear_text_alias_ro();
 }
 
-static void __init update_boot_cpu_offset_and_overflow_stack(void)
+static void __init update_boot_cpu_offset_and_exception_stack(void)
 {
-	u64 ovf_sp = (u64)raw_cpu_ptr(overflow_stack) + OVERFLOW_STACK_SIZE;
+	u64 exc_sp = (u64)raw_cpu_ptr(kernel_exception_stack) +
+		     KERNEL_EXC_STACK_SIZE;
 
 	asm volatile(
 	"	msr	tpidr_el1, %1\n"
@@ -457,7 +458,7 @@ static void __init update_boot_cpu_offset_and_overflow_stack(void)
 	"	msr	spsel, #1\n"
 	"	mov	sp, %0\n" /* Update the overflow stack pointer */
 	"	msr	spsel, #0"
-	: "+r" (ovf_sp)
+	: "+r" (exc_sp)
 	: "r" (per_cpu_offset(0))
 	: "memory");
 }
@@ -469,7 +470,7 @@ void __init smp_prepare_boot_cpu(void)
 	 * setup_per_cpu_areas(), and CPU0's boot time per-cpu area will be
 	 * freed shortly, so we must move over to the runtime per-cpu area.
 	 */
-	update_boot_cpu_offset_and_overflow_stack();
+	update_boot_cpu_offset_and_exception_stack();
 
 	cpuinfo_store_boot_cpu();
 	setup_boot_cpu_features();

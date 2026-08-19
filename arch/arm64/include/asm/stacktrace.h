@@ -59,12 +59,13 @@ static inline bool on_task_stack(const struct task_struct *tsk,
 
 #define on_thread_stack()	(on_task_stack(current, current_stack_pointer, 1))
 
-DECLARE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack);
+DECLARE_PER_CPU(unsigned long [KERNEL_EXC_STACK_SIZE/sizeof(long)],
+		kernel_exception_stack);
 
-static inline struct stack_info stackinfo_get_overflow(void)
+static inline struct stack_info stackinfo_get_kernel_exception(void)
 {
-	unsigned long low = (unsigned long)raw_cpu_ptr(overflow_stack);
-	unsigned long high = low + OVERFLOW_STACK_SIZE;
+	unsigned long low = (unsigned long)raw_cpu_ptr(kernel_exception_stack);
+	unsigned long high = low + KERNEL_EXC_STACK_SIZE;
 
 	return (struct stack_info) {
 		.low = low,

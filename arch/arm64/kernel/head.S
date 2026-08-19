@@ -213,7 +213,7 @@ SYM_CODE_END(preserve_boot_args)
 
 	mov	\tmp1, sp
 	msr	sp_el0, \tmp1
-	adr_this_cpu	\tmp1, overflow_stack + OVERFLOW_STACK_SIZE, \tmp2
+	adr_this_cpu	\tmp1, kernel_exception_stack + KERNEL_EXC_STACK_SIZE, \tmp2
 	mov	sp, \tmp1
 	msr	spsel, #0
 	.endm
