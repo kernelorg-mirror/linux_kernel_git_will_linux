@@ -205,7 +205,7 @@ SYM_FUNC_END(__host_hvc)
 
 .L__hyp_sp_overflow\@:
 	/* Switch to the overflow stack */
-	adr_this_cpu sp, overflow_stack + OVERFLOW_STACK_SIZE, x0
+	adr_this_cpu sp, overflow_stack + NVHE_OVERFLOW_STACK_SIZE, x0
 
 	b	hyp_panic_bad_stack
 	ASM_BUG()

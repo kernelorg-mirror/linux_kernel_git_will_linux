@@ -897,14 +897,14 @@ void bad_el0_sync(struct pt_regs *regs, int reason, unsigned long esr)
 			      "Bad EL0 synchronous exception");
 }
 
-DEFINE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack)
-	__aligned(16);
+DEFINE_PER_CPU(unsigned long [KERNEL_EXC_STACK_SIZE/sizeof(long)],
+	       kernel_exception_stack) __aligned(16);
 
 void __noreturn panic_bad_stack(struct pt_regs *regs, unsigned long esr, unsigned long far)
 {
 	unsigned long tsk_stk = (unsigned long)current->stack;
 	unsigned long irq_stk = (unsigned long)this_cpu_read(irq_stack_ptr);
-	unsigned long ovf_stk = (unsigned long)this_cpu_ptr(overflow_stack);
+	unsigned long exc_stk = (unsigned long)this_cpu_ptr(kernel_exception_stack);
 
 	console_verbose();
 	pr_emerg("Insufficient stack space to handle exception!");
@@ -912,12 +912,12 @@ void __noreturn panic_bad_stack(struct pt_regs *regs, unsigned long esr, unsigne
 	pr_emerg("ESR: 0x%016lx -- %s\n", esr, esr_get_class_string(esr));
 	pr_emerg("FAR: 0x%016lx\n", far);
 
-	pr_emerg("Task stack:     [0x%016lx..0x%016lx]\n",
+	pr_emerg("Task stack:      [0x%016lx..0x%016lx]\n",
 		 tsk_stk, tsk_stk + THREAD_SIZE);
-	pr_emerg("IRQ stack:      [0x%016lx..0x%016lx]\n",
+	pr_emerg("IRQ stack:       [0x%016lx..0x%016lx]\n",
 		 irq_stk, irq_stk + IRQ_STACK_SIZE);
-	pr_emerg("Overflow stack: [0x%016lx..0x%016lx]\n",
-		 ovf_stk, ovf_stk + OVERFLOW_STACK_SIZE);
+	pr_emerg("Exception stack: [0x%016lx..0x%016lx]\n",
+		 exc_stk, exc_stk + KERNEL_EXC_STACK_SIZE);
 
 	__show_regs(regs);
 

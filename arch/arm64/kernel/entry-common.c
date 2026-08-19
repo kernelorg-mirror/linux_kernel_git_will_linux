@@ -327,43 +327,43 @@ static void debug_exception_exit(struct pt_regs *regs)
 }
 NOKPROBE_SYMBOL(debug_exception_exit);
 
-static void noinstr el1h_64_check_overflow_stack(struct pt_regs *regs)
+static void noinstr el1h_64_check_exception_stack(struct pt_regs *regs)
 {
 	unsigned long sp = kernel_stack_pointer(regs) - sizeof(*regs);
-	unsigned long ovf_stack = (unsigned long)this_cpu_ptr(overflow_stack);
+	unsigned long exc_stack = (unsigned long)this_cpu_ptr(kernel_exception_stack);
 
 	/*
-	 * We're in big trouble if we've overflowed the overflow stack
+	 * We're in big trouble if we've overflowed the exception stack
 	 * so perform a best-effort check before we proceed. If our SP
-	 * is outside of the overflow stack for this CPU then presumably
+	 * is outside of the exceptoin stack for this CPU then presumably
 	 * we're already corrupting memory, so park ourselves here in an
 	 * attempt to contain the damage.
 	 */
-	if (sp < ovf_stack || sp > ovf_stack + OVERFLOW_STACK_SIZE)
+	if (sp < exc_stack || sp > exc_stack + KERNEL_EXC_STACK_SIZE)
 		cpu_park_loop();
 }
 
 asmlinkage void noinstr el1h_64_sync_handler(struct pt_regs *regs)
 {
-	el1h_64_check_overflow_stack(regs);
+	el1h_64_check_exception_stack(regs);
 	el1t_64_sync_handler(regs);
 }
 
 asmlinkage void noinstr el1h_64_irq_handler(struct pt_regs *regs)
 {
-	el1h_64_check_overflow_stack(regs);
+	el1h_64_check_exception_stack(regs);
 	el1t_64_irq_handler(regs);
 }
 
 asmlinkage void noinstr el1h_64_fiq_handler(struct pt_regs *regs)
 {
-	el1h_64_check_overflow_stack(regs);
+	el1h_64_check_exception_stack(regs);
 	el1t_64_fiq_handler(regs);
 }
 
 asmlinkage void noinstr el1h_64_error_handler(struct pt_regs *regs)
 {
-	el1h_64_check_overflow_stack(regs);
+	el1h_64_check_exception_stack(regs);
 	el1t_64_error_handler(regs);
 }
 

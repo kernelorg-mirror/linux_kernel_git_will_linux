@@ -44,8 +44,7 @@ static inline void kvm_nvhe_unwind_init(struct unwind_state *state,
  * In non-protected mode, the unwinding is done from kernel proper context
  * (by the host in EL1).
  */
-
-DECLARE_KVM_NVHE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack);
+DECLARE_KVM_NVHE_PER_CPU(unsigned long [NVHE_OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack);
 DECLARE_KVM_NVHE_PER_CPU(struct kvm_nvhe_stacktrace_info, kvm_stacktrace_info);
 DECLARE_PER_CPU(unsigned long, kvm_arm_hyp_stack_base);
 

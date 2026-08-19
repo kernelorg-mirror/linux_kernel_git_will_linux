@@ -9,7 +9,7 @@
 #include <asm/memory.h>
 #include <asm/percpu.h>
 
-DEFINE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack)
+DEFINE_PER_CPU(unsigned long [NVHE_OVERFLOW_STACK_SIZE/sizeof(long)], overflow_stack)
 	__aligned(16);
 
 DEFINE_PER_CPU(struct kvm_nvhe_stacktrace_info, kvm_stacktrace_info);
@@ -42,7 +42,7 @@ DEFINE_PER_CPU(unsigned long [NVHE_STACKTRACE_SIZE/sizeof(long)], pkvm_stacktrac
 static struct stack_info stackinfo_get_overflow(void)
 {
 	unsigned long low = (unsigned long)this_cpu_ptr(overflow_stack);
-	unsigned long high = low + OVERFLOW_STACK_SIZE;
+	unsigned long high = low + NVHE_OVERFLOW_STACK_SIZE;
 
 	return (struct stack_info) {
 		.low = low,

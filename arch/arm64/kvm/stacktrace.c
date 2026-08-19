@@ -27,7 +27,7 @@ static struct stack_info stackinfo_get_overflow(void)
 	struct kvm_nvhe_stacktrace_info *stacktrace_info
 				= this_cpu_ptr_nvhe_sym(kvm_stacktrace_info);
 	unsigned long low = (unsigned long)stacktrace_info->overflow_stack_base;
-	unsigned long high = low + OVERFLOW_STACK_SIZE;
+	unsigned long high = low + NVHE_OVERFLOW_STACK_SIZE;
 
 	return (struct stack_info) {
 		.low = low,
@@ -38,7 +38,7 @@ static struct stack_info stackinfo_get_overflow(void)
 static struct stack_info stackinfo_get_overflow_kern_va(void)
 {
 	unsigned long low = (unsigned long)this_cpu_ptr_nvhe_sym(overflow_stack);
-	unsigned long high = low + OVERFLOW_STACK_SIZE;
+	unsigned long high = low + NVHE_OVERFLOW_STACK_SIZE;
 
 	return (struct stack_info) {
 		.low = low,
